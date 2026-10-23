@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Secrets & Credentials (NEVER COMMIT)
+.env
+*.key
+*.pem
+
+# Browser Sessions & Login Cookies (NEVER COMMIT)
+data/*_session/
+data/whatsapp_session/
+data/profellow_session/
+data/mastersportal_session/
+data/wemakescholars_session/
+data/deep_evaluator_session/
+
+# Local SQLite Runtime Databases & Backups
+data/*.db*
+data/*.bak
+data/*.lock
+*.lock
+
+# Temporary Runtime Queues & Backlogs
+data/dead_letter_queue.jsonl
+data/scraped_backlog.json
+
+# Excel Trackers & Temporary Files
+*.xlsx
+*.xls
+~$*
+*.tmp
+
+# Applicant Master Profiles (Private CV & academic dossiers)
+*PROFILE*.md
+*Profile*.md
+
+# System & Agent Files
+.DS_Store
+Thumbs.db
+.agent/
+.gemini/
