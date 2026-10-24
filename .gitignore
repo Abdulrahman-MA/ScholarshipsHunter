@@ -31,6 +31,9 @@ data/*.lock
 # Temporary Runtime Queues & Backlogs
 data/dead_letter_queue.jsonl
 data/scraped_backlog.json
+data/last_daily_run.txt
+data/*.log
+*.log
 
 # Excel Trackers & Temporary Files
 *.xlsx
