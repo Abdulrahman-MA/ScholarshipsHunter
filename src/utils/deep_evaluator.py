@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import argparse
 import pandas as pd
 from playwright.sync_api import sync_playwright
 
@@ -32,10 +33,10 @@ def save_df_safely(df, excel_path):
             print(f"  [!] Error saving Excel: {e}")
             return False
 
-def run():
-    print("==================================================")
-    print(" 🔍 Phase 2: Deep Gemini Website Evaluator ")
-    print("==================================================")
+def run(limit=None, all_sources=True, auto=False):
+    print("=" * 60)
+    print(" 🔍 Deep Website Evaluator & Verification Engine ")
+    print("=" * 60)
     
     excel_path = config.OUTPUT_EXCEL_FILE
     if not os.path.exists(excel_path):
@@ -54,14 +55,20 @@ def run():
     else:
         df["Deep Checked"] = df["Deep Checked"].fillna("")
         
-    print("\nWhich rows would you like to deeply evaluate?")
-    print("[1] Only WhatsApp ('World Scholarship Opportunities') rows (Default)")
-    print("[2] ALL eligible rows across all web sources")
-    source_choice = input("Enter choice (1/2) [Default: 1]: ").strip()
-    only_whatsapp = (source_choice != "2")
-    
-    # Identify target rows: Match Score >= 50, Deep Checked != 'Yes', Link starts with http
-    target_indices = []
+    if not auto:
+        print("\nWhich rows would you like to deeply evaluate?")
+        print("[1] Only WhatsApp rows")
+        print("[2] ALL eligible rows across all web sources (Default)")
+        source_choice = input("Enter choice (1/2) [Default: 2]: ").strip()
+        all_sources = (source_choice != "1")
+    else:
+        print(f"Mode: Automated run (All sources: {all_sources}, Limit: {limit})")
+
+    # Identify target rows:
+    # 1. Match Score >= 50 (Focus on Green & Yellow opportunities)
+    # 2. Deep Checked is blank (never deep checked)
+    # 3. Link starts with http
+    target_items = []
     for idx, row in df.iterrows():
         try:
             score = float(row.get("Match Score", 0))
@@ -71,22 +78,36 @@ def run():
         deep_checked = str(row.get("Deep Checked", "")).strip().lower()
         link = str(row.get("Link", "")).strip()
         web_source = str(row.get("Web Source", "")).strip()
+        category = str(row.get("Category", "")).strip().lower()
         
-        if score >= 50 and deep_checked != "yes" and link.startswith("http"):
-            if only_whatsapp and "world scholarship opportunities" not in web_source.lower() and "whatsapp" not in web_source.lower():
+        # Only select rows that haven't been successfully deep-checked or marked failed
+        if score >= 50 and (not deep_checked or deep_checked == "") and link.startswith("http"):
+            if not all_sources and "whatsapp" not in web_source.lower():
                 continue
-            target_indices.append(idx)
+            # Store tuple: (priority, -score, idx)
+            # Priority: 0 for Green, 1 for Yellow
+            pri = 0 if "green" in category else 1
+            target_items.append((pri, -score, idx))
             
-    if not target_indices:
-        print("\n✅ No eligible unchecked links found (Match Score >= 50 with valid URLs)!")
+    if not target_items:
+        print("\n✅ All eligible scholarships are already Deep Checked! (0 unchecked links remaining)")
         return
         
-    print(f"\nFound {len(target_indices)} scholarships ready for Deep Gemini Evaluation.")
-    batch_input = input(f"How many would you like to process right now? (Enter a number, or press ENTER for all {len(target_indices)}): ").strip()
-    if batch_input.isdigit() and int(batch_input) > 0:
-        target_indices = target_indices[:int(batch_input)]
-        
-    # Force matcher to bypass local Ollama and use high-speed Cloud AI (Groq 120B with Gemini fallback)
+    # Sort: Green first, then highest Match Score first
+    target_items.sort()
+    target_indices = [item[2] for item in target_items]
+
+    print(f"\nFound {len(target_indices)} scholarships eligible for Deep Website Evaluation.")
+    
+    if not auto:
+        batch_input = input(f"How many would you like to process right now? (Enter a number, or press ENTER for all {len(target_indices)}): ").strip()
+        if batch_input.isdigit() and int(batch_input) > 0:
+            target_indices = target_indices[:int(batch_input)]
+    elif limit and limit > 0:
+        target_indices = target_indices[:limit]
+        print(f"Batch ceiling applied: Processing top {len(target_indices)} priority rows today.")
+
+    # Force matcher to use high-speed Cloud AI (Groq 120B with Gemini fallback)
     config.USE_OLLAMA = False
     
     user_data_dir = os.path.join(config.DATA_DIR, "deep_evaluator_session")
@@ -116,15 +137,15 @@ def run():
                 title = row.get("Title", "Unknown Title")
                 url = str(row.get("Link", "")).strip()
                 
-                print(f"[{count}/{len(target_indices)}] Deep checking: {title}")
+                print(f"[{count}/{len(target_indices)}] Deep checking: {title[:55]}")
                 print(f"  -> Visiting: {url}")
                 
                 try:
-                    page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                    time.sleep(2.5) # Let dynamic content settle
+                    page.goto(url, wait_until="domcontentloaded", timeout=20000)
+                    time.sleep(1.5) # Let dynamic content settle
                     body_text = page.locator("body").inner_text()
                 except Exception as e:
-                    print(f"  -> [!] Failed to load webpage: {e}")
+                    print(f"  -> [!] Webpage load failed: {e}")
                     df.at[idx, "Deep Checked"] = "Failed (Load Error)"
                     continue
                     
@@ -136,15 +157,15 @@ def run():
                 text_to_eval = (
                     f"Original Summary Title: {title}\n"
                     f"Source URL: {url}\n\n"
-                    f"Full Website Text:\n{body_text[:15000]}"
+                    f"Full Website Text:\n{body_text[:12000]}"
                 )
                 
-                print("  -> Querying Gemini API...")
+                print("  -> Querying Groq/Gemini LPU...")
                 opp, error_msg = matcher.evaluate_opportunity(text_to_eval)
                 
                 if opp:
                     print(f"  -> Verdict: {opp.category.upper()} (New Score: {opp.match_score})")
-                    print(f"  -> Reason: {opp.reasoning[:120]}...")
+                    print(f"  -> Reason: {opp.reasoning[:100]}...")
                     
                     df.at[idx, "Category"] = opp.category
                     df.at[idx, "Match Score"] = opp.match_score
@@ -157,19 +178,18 @@ def run():
                     df.at[idx, "Deep Checked"] = "Yes"
                     processed_count += 1
                 else:
-                    print(f"  -> [!] Gemini evaluation failed: {error_msg}")
+                    print(f"  -> [!] AI evaluation error: {error_msg}")
                     df.at[idx, "Deep Checked"] = f"Error: {error_msg}"
                     
                 # Auto-save every 5 items so progress is never lost
                 if processed_count > 0 and processed_count % 5 == 0:
-                    print("\n  [Auto-Save] Saving progress to Excel...")
+                    print("  [Auto-Save] Saving progress to Excel...")
                     save_df_safely(df, excel_path)
                     print("  [Auto-Save] Saved!\n")
                     
                 # Polite pacing between browser navigations
                 if count < len(target_indices):
-                    print("  -> Next evaluation in 2s...\n")
-                    time.sleep(2)
+                    time.sleep(1.0)
                     
             browser.close()
             
@@ -179,7 +199,13 @@ def run():
         if processed_count > 0:
             print("\nSaving final updates and re-applying Excel formatting...")
             if save_df_safely(df, excel_path):
-                print(f"✅ Successfully updated {processed_count} scholarships! Tip: Run Option [8] Clean Excel Sheet to prune any newly downgraded RED rows.")
+                print(f"✅ Successfully updated {processed_count} scholarships with full website verification!")
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser(description="Deep Website Evaluator")
+    parser.add_argument("--limit", type=int, default=None, help="Max rows to process (e.g. 100)")
+    parser.add_argument("--all-sources", action="store_true", help="Evaluate all web sources, not just WhatsApp")
+    parser.add_argument("--auto", action="store_true", help="Run unattended in automated mode")
+    args = parser.parse_args()
+    
+    run(limit=args.limit, all_sources=args.all_sources or args.auto, auto=args.auto)

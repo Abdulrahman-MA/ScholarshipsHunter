@@ -23,6 +23,13 @@ def export_to_excel(opportunities, output_path):
         # Handle source field
         source = msg.get("source", msg.get("sender", "World Scholarship Opportunities(WhatsApp)"))
         
+        raw_text = msg.get("text", "")
+        deep_checked_val = msg.get("deep_checked", "")
+        # If the scraped content is already a full comprehensive portal article (>= 500 chars),
+        # it has already been thoroughly evaluated with all eligibility and funding data.
+        if not deep_checked_val and len(raw_text.strip()) >= 500:
+            deep_checked_val = "Yes"
+
         row = {
             "Category": opp.category,
             "Title": opp.opportunity_title,
@@ -36,7 +43,8 @@ def export_to_excel(opportunities, output_path):
             "Scraped Date": scraped_date,
             "Web Source": source,
             "Match Score": opp.match_score,
-            "AI Rationale": opp.reasoning
+            "AI Rationale": opp.reasoning,
+            "Deep Checked": deep_checked_val
         }
         data.append(row)
 

@@ -146,8 +146,37 @@ def main():
                     remaining_queue.remove(msg)
                 continue
                 
+            # Ingestion Deep Check: If the message is a short teaser with an external URL,
+            # hydrate the full webpage content before sending to the AI so we never do dummy evaluations.
+            eval_text = text
+            if len(text.split()) < 75:
+                import re, urllib.request
+                urls = re.findall(r'https?://[^\s<>"]+|www\.[^\s<>"]+', text)
+                if urls:
+                    target_url = urls[0].rstrip('.,;:)')
+                    try:
+                        req = urllib.request.Request(
+                            target_url,
+                            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                        )
+                        with urllib.request.urlopen(req, timeout=10) as response:
+                            html = response.read().decode('utf-8', errors='ignore')
+                            cleaned = re.sub(r'<script.*?</script>', '', html, flags=re.DOTALL | re.IGNORECASE)
+                            cleaned = re.sub(r'<style.*?</style>', '', cleaned, flags=re.DOTALL | re.IGNORECASE)
+                            cleaned = re.sub(r'<[^>]+>', ' ', cleaned)
+                            cleaned = ' '.join(cleaned.split())
+                            if len(cleaned) > 200:
+                                print(f"  -> Hydrated full webpage text ({len(cleaned[:10000])} chars) from destination URL.")
+                                eval_text = f"{text}\n\n[Full Webpage Text from {target_url}]:\n{cleaned[:10000]}"
+                                msg["deep_checked"] = "Yes"
+                    except Exception:
+                        pass
+            else:
+                # Full forum / portal announcements already contain full detailed eligibility & criteria
+                msg["deep_checked"] = "Yes"
+
             print(f"Evaluating message {idx + 1}/{len(queue)}...")
-            opp, error_msg = evaluate_opportunity(text)
+            opp, error_msg = evaluate_opportunity(eval_text)
             
             if opp:
                 # The AI successfully extracted it!

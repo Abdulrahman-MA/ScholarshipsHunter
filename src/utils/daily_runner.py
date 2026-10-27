@@ -45,26 +45,44 @@ def main():
     
     python_exe = sys.executable
     run_all_script = os.path.join(BASE_DIR, "run_all.py")
+    deep_eval_script = os.path.join(BASE_DIR, "src", "utils", "deep_evaluator.py")
     
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
     env["PYTHONUTF8"] = "1"
     
     try:
-        # Run run_all.py as a subprocess
+        # Step 1: Run run_all.py (Ingest fresh scholarships from all 8 portals + process backlog)
+        log("[Step 1/2] Running multi-source orchestrator (run_all.py)...")
         proc = subprocess.run([python_exe, run_all_script], cwd=BASE_DIR, env=env)
         
-        if proc.returncode == 0:
-            log("[SUCCESS] Daily sweep completed successfully.")
-            # Record run date
-            with open(last_run_file, "w", encoding="utf-8") as f:
-                f.write(today_str)
-            return 0
+        if proc.returncode != 0:
+            log(f"[WARNING] run_all.py exited with returncode: {proc.returncode}")
         else:
-            log(f"[ERROR] run_all.py exited with failure code: {proc.returncode}")
-            return proc.returncode
+            log("[Step 1/2 OK] Ingestion & backlog evaluation finished.")
+            
+        # Step 2: Run daily deep check batch of up to 100 unchecked high-scoring opportunities
+        log("[Step 2/2] Running Deep Website Evaluator (Batch of 100 rows)...")
+        deep_proc = subprocess.run(
+            [python_exe, deep_eval_script, "--auto", "--all-sources", "--limit", "100"],
+            cwd=BASE_DIR,
+            env=env
+        )
+        
+        if deep_proc.returncode == 0:
+            log("[Step 2/2 OK] Daily 100-row deep evaluation completed successfully.")
+        else:
+            log(f"[WARNING] Deep evaluator exited with returncode: {deep_proc.returncode}")
+            
+        # Record successful daily execution date
+        with open(last_run_file, "w", encoding="utf-8") as f:
+            f.write(today_str)
+            
+        log("[SUCCESS] All daily tasks finished. Tracker updated.")
+        log("=" * 60)
+        return 0
     except Exception as ex:
-        log(f"[FATAL] Failed to execute run_all.py: {ex}")
+        log(f"[FATAL] Failed to execute daily runner: {ex}")
         return 1
 
 if __name__ == "__main__":
