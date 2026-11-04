@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scholarships Hunter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* palette */
+  --styx:#13191F;      /* page */
+  --carbon:#2B2F2E;    /* surfaces, rules */
+  --tea:#594C3D;       /* quiet accents, borders on hover */
+  --wood:#906D4B;      /* secondary text accent */
+  --amber:#CA9C68;     /* primary accent */
+  --ink:#EDE4D8;       /* body text, warm off-white */
+  --dim:#9A8F82;       /* muted text */
+  --rule:#252A2A;
+  /* match tiers, pulled into the same earth range */
+  --fit:#9DAF7E;  --maybe:#CA9C68;  --no:#B4664C;
+  --serif:"Fraunces",Georgia,serif;
+  --sans:"IBM Plex Sans","Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--styx);color:var(--ink);font:14px/1.5 var(--sans);height:100vh;display:flex;overflow:hidden}
+::selection{background:var(--tea)}
+
+/* sidebar */
+nav{width:228px;flex:none;border-right:1px solid var(--rule);display:flex;flex-direction:column;padding:28px 0 20px}
+.brand{padding:0 26px 30px}
+.brand .mark{font-family:var(--serif);font-size:22px;line-height:1.1;color:var(--amber);letter-spacing:-.3px}
+.brand .mark em{font-style:italic;color:var(--ink);font-weight:400}
+.brand small{display:block;margin-top:8px;font:500 10.5px var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:var(--dim)}
+nav button{all:unset;cursor:pointer;display:flex;gap:14px;align-items:baseline;padding:10px 26px;color:var(--dim);border-left:2px solid transparent;transition:color .15s}
+nav button span{font:11px var(--mono);color:var(--tea)}
+nav button:hover{color:var(--ink)}
+nav button.active{color:var(--ink);border-left-color:var(--amber)}
+nav button.active span{color:var(--amber)}
+nav .spacer{flex:1}
+.status{margin:0 26px;padding-top:16px;border-top:1px solid var(--rule);font:12px var(--mono);color:var(--dim)}
+.status b{display:block;color:var(--ink);font:500 13px var(--sans);margin-bottom:2px}
+.pulse{display:inline-block;width:7px;height:7px;background:var(--amber);margin-right:8px;animation:p 1.6s infinite}
+@keyframes p{50%{opacity:.25}}
+
+/* page */
+main{flex:1;overflow:auto;padding:34px 44px 48px}
+.view{display:none}.view.active{display:block}
+header.page{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--rule);padding-bottom:18px;margin-bottom:28px}
+h1{font:400 34px/1 var(--serif);margin:0;letter-spacing:-.6px}
+h1 i{color:var(--amber)}
+.kicker{font:500 10.5px var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:var(--wood);margin-bottom:10px}
+.meta{font:12px var(--mono);color:var(--dim);text-align:right}
+h2{font:500 10.5px var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:var(--wood);margin:0 0 14px}
+
+/* figures strip */
+.figures{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin-bottom:36px}
+.figures div{padding:18px 22px;border-left:1px solid var(--rule)}
+.figures div:first-child{border-left:0;padding-left:0}
+.figures .n{font:400 42px/1 var(--serif);letter-spacing:-1px;font-variant-numeric:lining-nums tabular-nums}
+.figures .l{font-size:12.5px;color:var(--dim);margin-top:8px}
+
+.cols{display:grid;grid-template-columns:1.5fr 1fr;gap:44px}
+
+/* tables */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font:500 10.5px var(--mono);letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);padding:0 10px 10px 0;border-bottom:1px solid var(--carbon)}
+td{padding:12px 10px 12px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.dim{color:var(--dim)}
+.mono{font-family:var(--mono);font-size:12.5px}
+.score{font:600 15px var(--serif);display:inline-flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.score::before{content:"";width:8px;height:8px}
+.fit::before{background:var(--fit)} .maybe::before{background:var(--maybe)} .no::before{background:var(--no)}
+.fit{color:var(--fit)} .maybe{color:var(--maybe)} .no{color:var(--no)}
+.list tbody tr{cursor:pointer}
+.list tbody tr:hover td{background:#191F24}
+.list tr.sel td{background:#1B2024}
+.list tr.sel td:first-child{box-shadow:inset 2px 0 0 var(--amber)}
+.list td:first-child,.list th:first-child{padding-left:12px}
+.days{font:12px var(--mono);color:var(--amber)}
+
+/* yield bars */
+.yield td{border:0;padding:7px 10px 7px 0}
+.bar{height:3px;background:var(--carbon)}
+.bar i{display:block;height:100%;background:var(--wood)}
+.bar i.bad{background:var(--no)}
+
+/* controls */
+.btn{all:unset;cursor:pointer;font:500 13px var(--sans);padding:8px 16px;background:var(--amber);color:var(--styx);transition:background .15s}
+.btn:hover{background:#D9AE7E}
+.btn.line{background:none;color:var(--ink);box-shadow:inset 0 0 0 1px var(--tea)}
+.btn.line:hover{box-shadow:inset 0 0 0 1px var(--amber);color:var(--amber)}
+.btn.sm{padding:5px 12px;font-size:12px}
+input,select{background:transparent;border:0;border-bottom:1px solid var(--tea);color:var(--ink);font:inherit;padding:7px 2px;border-radius:0;outline:none}
+input:focus,select:focus{border-bottom-color:var(--amber)}
+select option{background:var(--styx)}
+input::placeholder{color:var(--dim)}
+.filters{display:flex;gap:22px;align-items:end;margin-bottom:22px}
+.filters input{flex:1}
+
+/* opportunities split */
+.split{display:grid;grid-template-columns:1fr 380px;gap:36px}
+.detail{border-left:1px solid var(--rule);padding-left:32px}
+.detail h3{font:400 24px/1.2 var(--serif);margin:10px 0 6px;letter-spacing:-.3px}
+.detail dl{display:grid;grid-template-columns:96px 1fr;gap:9px 12px;margin:22px 0 26px;font-size:13px}
+.detail dt{font:11px var(--mono);letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding-top:2px}
+.detail p{margin:0 0 22px;color:#D6CCBF;line-height:1.65}
+.detail p.quote{font:italic 400 15px/1.55 var(--serif);color:var(--ink);border-left:2px solid var(--tea);padding-left:14px}
+.detail ol{margin:0 0 26px;padding-left:18px;color:#D6CCBF}
+.detail ol li{padding:3px 0}
+.actions{display:flex;gap:10px}
+
+/* sources ledger */
+.ledger td{padding:16px 14px 16px 0;vertical-align:middle}
+.ledger .name{font:500 15px var(--sans)}
+.ledger .how{font:12px var(--mono);color:var(--dim)}
+.state{font:500 11px var(--mono);letter-spacing:1px;text-transform:uppercase}
+.state.ok{color:var(--fit)} .state.run{color:var(--amber)} .state.err{color:var(--no)}
+.ledger input{width:48px;text-align:center}
+.topactions{display:flex;gap:10px}
+.log{margin-top:30px;background:#0E1317;border-top:1px solid var(--carbon);padding:16px 18px;font:12px/1.75 var(--mono);color:#B3A898;height:210px;overflow:auto}
+.log .t{color:var(--tea)} .log .ok{color:var(--fit)} .log .warn{color:var(--amber)}
+
+/* tools / settings */
+.tools{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--rule)}
+.tool{padding:26px 28px 28px 0;border-bottom:1px solid var(--rule)}
+.tool:nth-child(even){padding-left:28px;border-left:1px solid var(--rule)}
+.tool h3{font:400 21px var(--serif);margin:0 0 6px}
+.tool p{color:var(--dim);margin:0 0 18px;font-size:13px}
+.tool .row{display:flex;gap:14px;align-items:end}
+.tool .row input{flex:1}
+.narrow{max-width:680px}
+.section{margin-bottom:40px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand"><div class="mark">Scholarships<br><em>Hunter</em></div><small>Physics · MSc / PhD</small></div>
+  <button class="active" data-v="dash"><span>01</span>Overview</button>
+  <button data-v="opps"><span>02</span>Opportunities</button>
+  <button data-v="runs"><span>03</span>Sources</button>
+  <button data-v="tools"><span>04</span>Tools</button>
+  <button data-v="settings"><span>05</span>Settings</button>
+  <div class="spacer"></div>
+  <div class="status"><b><span class="pulse"></span>WhatsApp sweep</b>pid 18244 · 02:14 elapsed</div>
+</nav>
+
+<main>
+<!-- OVERVIEW -->
+<section class="view active" id="dash">
+  <header class="page">
+    <div><div class="kicker">Wednesday, 4 November</div><h1>Good morning. <i>11 days</i> to the next deadline.</h1></div>
+    <div class="meta">last sweep 07:02<br>next 05 Nov 07:00</div>
+  </header>
+  <div class="figures">
+    <div><div class="n">1,284</div><div class="l">opportunities on file</div></div>
+    <div><div class="n fit">96</div><div class="l">strong fits</div></div>
+    <div><div class="n maybe">211</div><div class="l">worth a second look</div></div>
+    <div><div class="n">37</div><div class="l">waiting for evaluation</div></div>
+  </div>
+  <div class="cols">
+    <div>
+      <h2>Closing within 30 days</h2>
+      <table><thead><tr><th>Opportunity</th><th>Closes</th><th>Fit</th></tr></thead><tbody>
+        <tr><td>Erasmus Mundus MSc in Astrophysics &amp; Space Science<div class="dim">MASS consortium</div></td><td class="mono">15 Nov<div class="days">11 d</div></td><td><span class="score fit">92</span></td></tr>
+        <tr><td>DAAD EPOS — Theoretical &amp; Mathematical Physics<div class="dim">LMU Munich</div></td><td class="mono">20 Nov<div class="days">16 d</div></td><td><span class="score fit">88</span></td></tr>
+        <tr><td>Excellence Grant, Physics of Data<div class="dim">Univ. of Padova · DSU Veneto</div></td><td class="mono">28 Nov<div class="days">24 d</div></td><td><span class="score maybe">71</span></td></tr>
+        <tr><td>Postgraduate Diploma, High Energy Physics<div class="dim">ICTP Trieste</div></td><td class="mono">01 Dec<div class="days">27 d</div></td><td><span class="score fit">90</span></td></tr>
+      </tbody></table>
+    </div>
+    <div>
+      <h2>New this week, by source</h2>
+      <table class="yield"><tbody>
+        <tr><td>WhatsApp channels</td><td style="width:42%"><div class="bar"><i style="width:100%"></i></div></td><td class="mono">64</td></tr>
+        <tr><td>Scholarships Corner</td><td><div class="bar"><i style="width:77%"></i></div></td><td class="mono">49</td></tr>
+        <tr><td>MastersPortal</td><td><div class="bar"><i style="width:48%"></i></div></td><td class="mono">31</td></tr>
+        <tr><td>WeMakeScholars</td><td><div class="bar"><i style="width:27%"></i></div></td><td class="mono">17</td></tr>
+        <tr><td>Catch That Scholarship</td><td><div class="bar"><i style="width:19%"></i></div></td><td class="mono">12</td></tr>
+        <tr><td>ProFellow <span class="state err">· failed</span></td><td><div class="bar"><i class="bad" style="width:11%"></i></div></td><td class="mono">7</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- OPPORTUNITIES -->
+<section class="view" id="opps">
+  <header class="page">
+    <div><div class="kicker">scholarships_tracker.xlsx · read only</div><h1>Opportunities</h1></div>
+    <div class="meta">1,284 rows<br>showing 6</div>
+  </header>
+  <div class="filters">
+    <input placeholder="Search title, institution, field">
+    <select><option>Every fit</option><option>Strong fit</option><option>Second look</option><option>Not a fit</option></select>
+    <select><option>Any funding</option><option>Fully funded</option><option>Partial</option></select>
+    <select><option>Any level</option><option>MSc</option><option>PhD</option><option>Fellowship</option></select>
+    <select><option>Closing soonest</option><option>Highest fit</option><option>Newest</option></select>
+  </div>
+  <div class="split">
+    <table class="list"><thead><tr><th>Fit</th><th>Opportunity</th><th>Where</th><th>Closes</th></tr></thead><tbody>
+      <tr class="sel"><td><span class="score fit">92</span></td><td>Erasmus Mundus MSc in Astrophysics &amp; Space Science</td><td class="dim">EU consortium</td><td class="mono">15 Nov</td></tr>
+      <tr><td><span class="score fit">90</span></td><td>Postgraduate Diploma, High Energy Physics</td><td class="dim">ICTP · Italy</td><td class="mono">01 Dec</td></tr>
+      <tr><td><span class="score fit">88</span></td><td>DAAD EPOS — Theoretical &amp; Mathematical Physics</td><td class="dim">LMU · Germany</td><td class="mono">20 Nov</td></tr>
+      <tr><td><span class="score maybe">71</span></td><td>Excellence Grant, Physics of Data</td><td class="dim">Padova · Italy</td><td class="mono">28 Nov</td></tr>
+      <tr><td><span class="score maybe">64</span></td><td>Plasma Physics PhD Studentship</td><td class="dim">York · UK</td><td class="mono">10 Jan</td></tr>
+      <tr><td><span class="score no">18</span></td><td>MBA Leadership Scholarship</td><td class="dim">IE · Spain</td><td class="mono">12 Dec</td></tr>
+    </tbody></table>
+    <aside class="detail">
+      <span class="score fit">92 · strong fit</span>
+      <h3>Erasmus Mundus MSc in Astrophysics &amp; Space Science</h3>
+      <div class="dim">Belgrade · Rome · Nice · Tartu</div>
+      <dl>
+        <dt>Level</dt><dd>MSc, two years</dd>
+        <dt>Funding</dt><dd>Full — €1,400 / month plus travel</dd>
+        <dt>Closes</dt><dd>15 Nov 2026 <span class="days">· 11 days</span></dd>
+        <dt>Fields</dt><dd>Astrophysics, cosmology</dd>
+        <dt>Source</dt><dd>WhatsApp · Erasmus+ channel</dd>
+      </dl>
+      <h2>Why it fits</h2>
+      <p class="quote">Open to non-EU applicants including Egypt. Requires a BSc in Physics and matches the astrophysics track closely. IELTS 6.5.</p>
+      <h2>To prepare</h2>
+      <ol><li>Two recommendation letters</li><li>Motivation letter, two pages at most</li><li>IELTS certificate</li></ol>
+      <div class="actions"><button class="btn">Open application</button><button class="btn line">Re-evaluate</button></div>
+    </aside>
+  </div>
+</section>
+
+<!-- SOURCES -->
+<section class="view" id="runs">
+  <header class="page">
+    <div><div class="kicker">8 sources · 1 running</div><h1>Sources</h1></div>
+    <div class="topactions"><button class="btn line">Deep evaluator</button><button class="btn line">Process backlog · 37</button><button class="btn">Run everything</button></div>
+  </header>
+  <table class="ledger"><thead><tr><th>Source</th><th>Method</th><th>Last run</th><th>New</th><th>State</th><th></th></tr></thead><tbody>
+    <tr><td class="name">WhatsApp channels</td><td class="how">6 channels · <input value="25"> msgs each</td><td class="mono">running</td><td class="mono">—</td><td class="state run">Running</td><td><button class="btn line sm">Stop</button></td></tr>
+    <tr><td class="name">Catch That Scholarship</td><td class="how">JSON feed</td><td class="mono">07:04</td><td class="mono">12</td><td class="state ok">OK</td><td><button class="btn line sm">Run</button></td></tr>
+    <tr><td class="name">GradSchoolShopper</td><td class="how">AIP directory</td><td class="mono">07:05</td><td class="mono">3</td><td class="state ok">OK</td><td><button class="btn line sm">Run</button></td></tr>
+    <tr><td class="name">ProFellow</td><td class="how">browser · Cloudflare check blocked</td><td class="mono">07:09</td><td class="mono">0</td><td class="state err">Failed</td><td><button class="btn line sm">Retry</button></td></tr>
+    <tr><td class="name">WeMakeScholars</td><td class="how">browser · paginated</td><td class="mono">07:12</td><td class="mono">17</td><td class="state ok">OK</td><td><button class="btn line sm">Run</button></td></tr>
+    <tr><td class="name">Scholarships Corner</td><td class="how">WordPress API</td><td class="mono">07:13</td><td class="mono">49</td><td class="state ok">OK</td><td><button class="btn line sm">Run</button></td></tr>
+    <tr><td class="name">MastersPortal</td><td class="how">browser · physics &amp; astronomy</td><td class="mono">07:20</td><td class="mono">31</td><td class="state ok">OK</td><td><button class="btn line sm">Run</button></td></tr>
+    <tr><td class="name">Hussain Silat</td><td class="how">67 Italian universities · DSU</td><td class="mono">07:21</td><td class="mono">2</td><td class="state ok">OK</td><td><button class="btn line sm">Run</button></td></tr>
+  </tbody></table>
+  <div class="log">
+    <span class="t">07:31:02</span>  whatsapp  opening persistent session<br>
+    <span class="t">07:31:09</span>  whatsapp  <span class="ok">Erasmus+ — 25 messages read</span><br>
+    <span class="t">07:31:15</span>  dedup     19 already seen, 6 queued<br>
+    <span class="t">07:31:16</span>  groq#2    evaluating "Erasmus Mundus MSc in Astrophysics…"<br>
+    <span class="t">07:31:18</span>  groq#2    <span class="warn">429 rate limited, switching to gemini#1</span><br>
+    <span class="t">07:31:20</span>  tracker   <span class="ok">scored 92, row written</span>
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section class="view" id="tools">
+  <header class="page"><div><div class="kicker">Utilities</div><h1>Tools</h1></div></header>
+  <div class="tools">
+    <div class="tool"><h3>Evaluate a link</h3><p>Paste any scholarship page and get a fit score in a few seconds.</p><div class="row"><input placeholder="https://"><button class="btn">Evaluate</button></div></div>
+    <div class="tool"><h3>Sign-in browser</h3><p>Opens the shared browser profile so you can log in to WhatsApp and the portals.</p><button class="btn line">Open browser</button></div>
+    <div class="tool"><h3>Tidy the tracker</h3><p>Removes duplicate rows and repairs formatting in the Excel file.</p><button class="btn line">Run cleaner</button></div>
+    <div class="tool"><h3>Open in Excel</h3><p>scholarships_tracker.xlsx, as it is right now.</p><button class="btn line">Open file</button></div>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section class="view" id="settings">
+  <header class="page"><div><div class="kicker">Read from .env · keys never shown</div><h1>Settings</h1></div></header>
+  <div class="narrow">
+    <div class="section"><h2>Model keys</h2>
+      <table><thead><tr><th>Key</th><th>Provider</th><th>State</th></tr></thead><tbody>
+        <tr><td class="mono">gsk_····a91f</td><td>Groq</td><td class="state ok">Healthy</td></tr>
+        <tr><td class="mono">gsk_····77c2</td><td>Groq</td><td class="state run">Rate limited</td></tr>
+        <tr><td class="mono">AIza····Q3k</td><td>Gemini</td><td class="state ok">Healthy</td></tr>
+      </tbody></table></div>
+    <div class="section"><h2>Daily sweep</h2>
+      <div class="filters"><select><option>On, every day at 07:00</option><option>Off</option></select><button class="btn line">Run now</button></div></div>
+  </div>
+</section>
+</main>
+<script>
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button,.view').forEach(e=>e.classList.remove('active'));
+  b.classList.add('active');document.getElementById(b.dataset.v).classList.add('active');
+});
+</script>
+</body>
+</html>

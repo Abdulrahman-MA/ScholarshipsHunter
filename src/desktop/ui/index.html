@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scholarships Hunter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav>
+  <div class="brand"><div class="mark">Scholarships<br><em>Hunter</em></div><small>Physics · MSc / PhD</small></div>
+  <button class="active" data-v="dash"><span>01</span>Overview</button>
+  <button data-v="opps"><span>02</span>Opportunities</button>
+  <button data-v="runs"><span>03</span>Sources</button>
+  <button data-v="tools"><span>04</span>Tools</button>
+  <button data-v="settings"><span>05</span>Settings</button>
+  <div class="spacer"></div>
+  <div class="status"><b><span class="pulse idle" id="pulse"></span><span id="st-name">Idle</span></b><span id="st-meta">nothing running</span></div>
+</nav>
+
+<main>
+<!-- OVERVIEW -->
+<section class="view active" id="dash">
+  <header class="page">
+    <div><div class="kicker" id="dash-kicker">&nbsp;</div><h1 id="dash-title">&nbsp;</h1></div>
+    <div class="meta" id="dash-meta"></div>
+  </header>
+  <p class="errline" id="err-dash" hidden></p>
+  <div class="figures">
+    <div><div class="n" id="fig-total">—</div><div class="l">opportunities on file</div></div>
+    <div><div class="n fit" id="fig-fit">—</div><div class="l">strong fits</div></div>
+    <div><div class="n maybe" id="fig-maybe">—</div><div class="l">worth a second look</div></div>
+    <div><div class="n" id="fig-backlog">—</div><div class="l">waiting for evaluation</div></div>
+  </div>
+  <div class="cols">
+    <div>
+      <h2>Closing within 30 days</h2>
+      <table><thead><tr><th>Opportunity</th><th>Closes</th><th>Fit</th></tr></thead>
+        <tbody id="closing-body"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div>
+      <h2>New this week, by source</h2>
+      <table class="yield"><tbody id="yield-body"><tr><td class="empty">Loading…</td></tr></tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- OPPORTUNITIES -->
+<section class="view" id="opps">
+  <header class="page">
+    <div><div class="kicker">scholarships_tracker.xlsx · read only</div><h1>Opportunities</h1></div>
+    <div class="meta" id="opps-meta"></div>
+  </header>
+  <p class="errline" id="err-opps" hidden></p>
+  <div class="filters">
+    <input id="f-q" placeholder="Search title, institution, field" aria-label="Search">
+    <select id="f-tier" aria-label="Fit">
+      <option value="">Every fit</option>
+      <option value="fit">Strong fit</option>
+      <option value="maybe">Second look</option>
+      <option value="no">Not a fit</option>
+    </select>
+    <select id="f-funding" aria-label="Funding">
+      <option value="">Any funding</option>
+      <option value="full">Fully funded</option>
+      <option value="partial">Partial</option>
+    </select>
+    <select id="f-level" aria-label="Level">
+      <option value="">Any level</option>
+      <option value="masters">MSc</option>
+      <option value="phd">PhD</option>
+      <option value="internship">Fellowship / internship</option>
+      <option value="school">School / diploma</option>
+    </select>
+    <select id="f-sort" aria-label="Sort">
+      <option value="deadline">Closing soonest</option>
+      <option value="score">Highest fit</option>
+      <option value="newest">Newest</option>
+    </select>
+  </div>
+  <div class="split">
+    <table class="list">
+      <thead><tr><th>Fit</th><th>Opportunity</th><th>Where</th><th>Closes</th></tr></thead>
+      <tbody id="opps-body"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+    </table>
+    <aside class="detail" id="detail">
+      <p class="empty" id="detail-empty">Select an opportunity to see its details.</p>
+      <div id="detail-body" hidden>
+        <span class="score" id="d-score"></span>
+        <h3 id="d-title"></h3>
+        <div class="dim" id="d-inst"></div>
+        <dl>
+          <dt>Level</dt><dd id="d-level"></dd>
+          <dt>Funding</dt><dd id="d-funding"></dd>
+          <dt>Closes</dt><dd id="d-closes"></dd>
+          <dt>Fields</dt><dd id="d-fields"></dd>
+          <dt>Source</dt><dd id="d-source"></dd>
+        </dl>
+        <h2>Why it fits</h2>
+        <p class="quote" id="d-why"></p>
+        <h2>To prepare</h2>
+        <ol id="d-prep"></ol>
+        <div class="actions">
+          <button class="btn" id="d-open">Open application</button>
+          <button class="btn line" id="d-reeval">Re-evaluate</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- SOURCES -->
+<section class="view" id="runs">
+  <header class="page">
+    <div><div class="kicker" id="runs-kicker">&nbsp;</div><h1>Sources</h1></div>
+    <div class="topactions">
+      <button class="btn line" id="btn-deep">Deep evaluator</button>
+      <button class="btn line" id="btn-backlog">Process backlog</button>
+      <button class="btn" id="btn-all">Run everything</button>
+    </div>
+  </header>
+  <p class="errline" id="err-runs" hidden></p>
+  <table class="ledger">
+    <thead><tr><th>Source</th><th>Method</th><th>Last run</th><th>New</th><th>State</th><th></th></tr></thead>
+    <tbody id="ledger-body"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+  </table>
+  <div class="log" id="log"><div class="empty" id="log-empty">No output yet. Run a source to see its log here.</div></div>
+</section>
+
+<!-- TOOLS -->
+<section class="view" id="tools">
+  <header class="page"><div><div class="kicker">Utilities</div><h1>Tools</h1></div></header>
+  <p class="errline" id="err-tools" hidden></p>
+  <div class="tools">
+    <div class="tool">
+      <h3>Evaluate a link</h3>
+      <p>Paste any scholarship page and get a fit score in a few seconds.</p>
+      <div class="row"><input id="tool-url" placeholder="https://" aria-label="Scholarship link"><button class="btn" id="tool-eval">Evaluate</button></div>
+    </div>
+    <div class="tool">
+      <h3>Sign-in browser</h3>
+      <p>Opens the shared browser profile so you can log in to WhatsApp and the portals.</p>
+      <button class="btn line" id="tool-login">Open browser</button>
+    </div>
+    <div class="tool">
+      <h3>Tidy the tracker</h3>
+      <p>Removes duplicate rows and repairs formatting in the Excel file.</p>
+      <button class="btn line" id="tool-clean">Run cleaner</button>
+    </div>
+    <div class="tool">
+      <h3>Open in Excel</h3>
+      <p>scholarships_tracker.xlsx, as it is right now.</p>
+      <button class="btn line" id="tool-open">Open file</button>
+    </div>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section class="view" id="settings">
+  <header class="page"><div><div class="kicker">Read from .env · keys never shown</div><h1>Settings</h1></div></header>
+  <p class="errline" id="err-settings" hidden></p>
+  <div class="narrow">
+    <div class="section">
+      <h2>Model keys</h2>
+      <table>
+        <thead><tr><th>Key</th><th>Provider</th><th>State</th></tr></thead>
+        <tbody id="keys-body"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="section">
+      <h2>Daily sweep</h2>
+      <div class="filters">
+        <select id="daily-state" disabled aria-label="Daily sweep"><option>On</option><option>Off</option></select>
+        <button class="btn line" id="btn-daily">Run now</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script src="mock.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
