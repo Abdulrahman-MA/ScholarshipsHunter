@@ -1,0 +1,230 @@
+{
+  "run_all.py": {
+    "mtime": 1793657821.7228093,
+    "seen": 1793810043.8924537,
+    "ast_hash": "a7c41ef6e872ce23cca553c54d19c654",
+    "semantic_hash": ""
+  },
+  "src/core/config.py": {
+    "mtime": 1793657821.73181,
+    "seen": 1793810043.8924623,
+    "ast_hash": "a35620df8f2ef4de36f3de657ffd2ed4",
+    "semantic_hash": ""
+  },
+  "src/core/exporter.py": {
+    "mtime": 1793657821.7424164,
+    "seen": 1793810043.892466,
+    "ast_hash": "0f2cf19b08f4776d4d52a0b8a079e793",
+    "semantic_hash": ""
+  },
+  "src/core/matcher.py": {
+    "mtime": 1793657821.7559545,
+    "seen": 1793810043.8924685,
+    "ast_hash": "2d11f9027f64b5886fc99d41b9e3e29a",
+    "semantic_hash": ""
+  },
+  "src/desktop/__init__.py": {
+    "mtime": 1793809967.7359266,
+    "seen": 1793810043.8924708,
+    "ast_hash": "bda8ddd6c8bec456119743086502acc8",
+    "semantic_hash": ""
+  },
+  "src/desktop/__main__.py": {
+    "mtime": 1793809968.643218,
+    "seen": 1793810043.8924727,
+    "ast_hash": "651ee7250062df80454465d65eaa1caf",
+    "semantic_hash": ""
+  },
+  "src/desktop/bridge.py": {
+    "mtime": 1793809966.7026274,
+    "seen": 1793810043.8924751,
+    "ast_hash": "47b524607b93f6fb7045a0a67304619d",
+    "semantic_hash": ""
+  },
+  "src/desktop/runner.py": {
+    "mtime": 1793809974.8350108,
+    "seen": 1793810043.8924773,
+    "ast_hash": "0b8d95616948089b5d8746631d12446b",
+    "semantic_hash": ""
+  },
+  "src/desktop/tracker.py": {
+    "mtime": 1793809975.8263867,
+    "seen": 1793810043.892479,
+    "ast_hash": "0992fb96b6145efe1efa122921a3b3b1",
+    "semantic_hash": ""
+  },
+  "src/desktop/ui/app.js": {
+    "mtime": 1793809996.014609,
+    "seen": 1793810043.8924813,
+    "ast_hash": "d8a8045f9733e7b7dff17c40714ccd18",
+    "semantic_hash": ""
+  },
+  "src/desktop/ui/mock.js": {
+    "mtime": 1793809989.2959802,
+    "seen": 1793810043.8924832,
+    "ast_hash": "b7a93b5868b03eaa643011dd06fd029a",
+    "semantic_hash": ""
+  },
+  "src/main.py": {
+    "mtime": 1793657821.7669554,
+    "seen": 1793810043.8924859,
+    "ast_hash": "930fbb3c1d4afcc0188d6ea1c9c7118a",
+    "semantic_hash": ""
+  },
+  "src/scrapers/catchthatscholarship.py": {
+    "mtime": 1793657821.779957,
+    "seen": 1793810043.8924878,
+    "ast_hash": "a8bce9302591bf836a76d3823893e092",
+    "semantic_hash": ""
+  },
+  "src/scrapers/gradschoolshopper.py": {
+    "mtime": 1793657821.7911146,
+    "seen": 1793810043.8924897,
+    "ast_hash": "dd748c83f5a149d0cc3eb8078ba94303",
+    "semantic_hash": ""
+  },
+  "src/scrapers/hussainsilat.py": {
+    "mtime": 1793657821.7921166,
+    "seen": 1793810043.8924923,
+    "ast_hash": "e4e10c3123beeb6a24dc07d7a027240f",
+    "semantic_hash": ""
+  },
+  "src/scrapers/mastersportal.py": {
+    "mtime": 1793657821.8041117,
+    "seen": 1793810043.8924947,
+    "ast_hash": "df0111a6b9e792eddc0240a1eb3cd158",
+    "semantic_hash": ""
+  },
+  "src/scrapers/profellow.py": {
+    "mtime": 1793657821.8041117,
+    "seen": 1793810043.8924966,
+    "ast_hash": "bbe43a00aca111b08c289a65ddb8b184",
+    "semantic_hash": ""
+  },
+  "src/scrapers/scholarshipscorner.py": {
+    "mtime": 1793657821.8141131,
+    "seen": 1793810043.8924985,
+    "ast_hash": "c0fe8d5c5ed7830897517329d65e5a0b",
+    "semantic_hash": ""
+  },
+  "src/scrapers/wemakescholars.py": {
+    "mtime": 1793657821.82411,
+    "seen": 1793810043.8925004,
+    "ast_hash": "e9ea77887c660e813f53608fbde908a4",
+    "semantic_hash": ""
+  },
+  "src/scrapers/whatsapp.py": {
+    "mtime": 1793657821.8362513,
+    "seen": 1793810043.8925023,
+    "ast_hash": "f88f06fd1ebba163466e9c1ec9e48637",
+    "semantic_hash": ""
+  },
+  "src/utils/clean_excel.py": {
+    "mtime": 1793657821.8468575,
+    "seen": 1793810043.892504,
+    "ast_hash": "0136f459ce34565f9047666779adaa22",
+    "semantic_hash": ""
+  },
+  "src/utils/daily_runner.py": {
+    "mtime": 1793657821.8558602,
+    "seen": 1793810043.892506,
+    "ast_hash": "e02d2fc35712a10e11b947cf4700a9fd",
+    "semantic_hash": ""
+  },
+  "src/utils/deep_evaluator.py": {
+    "mtime": 1793657821.8648562,
+    "seen": 1793810043.8925085,
+    "ast_hash": "36567e78fc03f6fe2821e4a8d65392d4",
+    "semantic_hash": ""
+  },
+  "src/utils/generate_mazen_tracker.py": {
+    "mtime": 1793657821.8754869,
+    "seen": 1793810043.8925104,
+    "ast_hash": "31e2c15303ecf18762821aaa23cb2762",
+    "semantic_hash": ""
+  },
+  "src/utils/manual_login.py": {
+    "mtime": 1793657821.8840032,
+    "seen": 1793810043.8925123,
+    "ast_hash": "fe3b9ed30847b750be5e6851a3aef721",
+    "semantic_hash": ""
+  },
+  "src/utils/manual_url_evaluator.py": {
+    "mtime": 1793657821.8940008,
+    "seen": 1793810043.892514,
+    "ast_hash": "fb415e33ecb7e1014ad72b591925d8c1",
+    "semantic_hash": ""
+  },
+  "src/utils/reconcile_db.py": {
+    "mtime": 1793657821.903003,
+    "seen": 1793810043.8925161,
+    "ast_hash": "49e4fe18e7562884ae0bcd721e569295",
+    "semantic_hash": ""
+  },
+  "tests/test_desktop.py": {
+    "mtime": 1793810022.1939223,
+    "seen": 1793810043.8925178,
+    "ast_hash": "0c5ea0f1fa90abaf854b14870c460368",
+    "semantic_hash": ""
+  },
+  "GEMINI.md": {
+    "mtime": 1793657821.6535852,
+    "seen": 1793810043.8925197,
+    "ast_hash": "f23f65cbba95bb1c04e3158baa4ce180",
+    "semantic_hash": ""
+  },
+  "IDEA.md": {
+    "mtime": 1793657659.1715367,
+    "seen": 1793810043.8925216,
+    "ast_hash": "5c8d0ca99c8871f6c92eedd60b5aab14",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1793657821.6735828,
+    "seen": 1793810043.8925235,
+    "ast_hash": "a98b4dcb9f8ed8c797162c7a13406221",
+    "semantic_hash": ""
+  },
+  "data/raw_messages.txt": {
+    "mtime": 1793657821.7028086,
+    "seen": 1793810043.8925257,
+    "ast_hash": "0235e917dd3fa955bc28d2d6402ae30b",
+    "semantic_hash": ""
+  },
+  "docs/design/desktop-api.md": {
+    "mtime": 1793809711.208037,
+    "seen": 1793810043.8925273,
+    "ast_hash": "ab947bbc085ac30790a44085a5a50e09",
+    "semantic_hash": ""
+  },
+  "docs/design/desktop-mockup.html": {
+    "mtime": 1793809612.2654133,
+    "seen": 1793810043.8925292,
+    "ast_hash": "729978bcff6a2fbd4796cdef3d528b2c",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-11-03-scholarships-hunter-master-implementation-plan.md": {
+    "mtime": 1793659845.9896162,
+    "seen": 1793810043.8925312,
+    "ast_hash": "51d356bf85f0c0f06742fbbfc3564a5e",
+    "semantic_hash": ""
+  },
+  "docs/roadmap/issues.md": {
+    "mtime": 1793659857.880731,
+    "seen": 1793810043.8925333,
+    "ast_hash": "dd3ad09e450b6ecf77880ab8e5d27d75",
+    "semantic_hash": ""
+  },
+  "requirements.txt": {
+    "mtime": 1793809978.6508312,
+    "seen": 1793810043.892535,
+    "ast_hash": "33d8670955dc220e0199c405cea40719",
+    "semantic_hash": ""
+  },
+  "src/desktop/ui/index.html": {
+    "mtime": 1793809947.9890926,
+    "seen": 1793810043.8925369,
+    "ast_hash": "df32475c6c1d0f58ebf55e87072e4397",
+    "semantic_hash": ""
+  }
+}

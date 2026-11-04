@@ -356,7 +356,7 @@ def daily_schedule(force: bool = False) -> dict:
 
 
 def _query_schedule() -> dict:
-    result: dict[str, Any] = {"enabled": False, "time": None, "next_run": None}
+    result: dict[str, Any] = {"enabled": False, "time": None, "next_run": None, "task_name": None}
     if not IS_WIN:
         return result
     try:
@@ -364,7 +364,12 @@ def _query_schedule() -> dict:
                               capture_output=True, timeout=20, creationflags=CREATE_NO_WINDOW)
     except (OSError, subprocess.SubprocessError):
         return result
-    text = proc.stdout.decode("oem", errors="replace")
+    return parse_schedule_csv(proc.stdout.decode("oem", errors="replace"))
+
+
+def parse_schedule_csv(text: str) -> dict:
+    """Pick the RunDaily.bat entry out of `schtasks /Query /FO CSV /V` output."""
+    result: dict[str, Any] = {"enabled": False, "time": None, "next_run": None, "task_name": None}
     for row in csv.DictReader(io.StringIO(text)):
         values = [str(v or "") for v in row.values()]
         if not any(SCHEDULE_TASK_MARK in v.lower() for v in values):
@@ -374,5 +379,61 @@ def _query_schedule() -> dict:
         for key, field in (("time", "Start Time"), ("next_run", "Next Run Time")):
             value = str(row.get(field) or "").strip()
             result[key] = value if value and value.upper() != "N/A" else None
+        result["time"] = to_hhmm(result["time"])
+        result["task_name"] = str(row.get("TaskName") or "").strip() or None
         break
     return result
+
+
+_HHMM = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
+_CLOCK = re.compile(r"^\s*(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp][Mm])?\s*$")
+DAILY_TASK_NAME = "ScholarshipsHunter Daily Sweep"
+DEFAULT_DAILY_TIME = "07:00"
+
+
+def to_hhmm(value: Any) -> str | None:
+    """'7:00:00 AM' / '19:05:00' / '07:00' -> 'HH:MM' (24h); None when unparseable."""
+    m = _CLOCK.match(str(value or ""))
+    if not m:
+        return None
+    hour, minute, ampm = int(m.group(1)), int(m.group(2)), (m.group(3) or "").lower()
+    if ampm == "pm" and hour < 12:
+        hour += 12
+    elif ampm == "am" and hour == 12:
+        hour = 0
+    if hour > 23 or minute > 59:
+        return None
+    return f"{hour:02d}:{minute:02d}"
+
+
+def schedule_command(current: dict, enabled: bool, at: str | None,
+                     bat_path: Path | None = None) -> list[str] | None:
+    """The schtasks argv that moves the schedule to the requested state (None = nothing to do)."""
+    name = current.get("task_name")
+    if name is None:
+        if not enabled:
+            return None  # nothing scheduled, nothing to disable
+        bat = bat_path or (REPO_ROOT / "RunDaily.bat")
+        return ["schtasks", "/Create", "/SC", "DAILY", "/TN", DAILY_TASK_NAME,
+                "/TR", f'"{bat}"', "/ST", at or DEFAULT_DAILY_TIME, "/F"]
+    cmd = ["schtasks", "/Change", "/TN", name, "/ENABLE" if enabled else "/DISABLE"]
+    if at and at != current.get("time"):
+        cmd += ["/ST", at]
+    return cmd
+
+
+def set_daily(enabled: bool, at: Any = None, run: Callable = subprocess.run) -> dict:
+    """Enable/disable (or create) the Task Scheduler entry for RunDaily.bat and set its time."""
+    if not IS_WIN:
+        raise RuntimeError("The daily sweep uses Windows Task Scheduler, which is not available here")
+    at = str(at).strip() if at not in (None, "") else None
+    if at is not None and not _HHMM.match(at):
+        raise ValueError("Time must be HH:MM in 24-hour format, e.g. 07:00")
+    cmd = schedule_command(daily_schedule(force=True), bool(enabled), at)
+    if cmd is not None:
+        proc = run(cmd, capture_output=True, timeout=30, creationflags=CREATE_NO_WINDOW)
+        if proc.returncode != 0:
+            raw = (proc.stderr or b"") + (proc.stdout or b"")
+            msg = raw.decode("oem", errors="replace").strip() if isinstance(raw, bytes) else str(raw)
+            raise RuntimeError(msg or f"schtasks failed with exit code {proc.returncode}")
+    return daily_schedule(force=True)

@@ -69,7 +69,9 @@ def run():
         }
         
         print("\nSaving evaluation directly to your Excel Tracker...")
-        exporter.export_to_excel([{"opp": result, "msg": msg_dict}], config.OUTPUT_EXCEL_FILE)
+        # The newest evaluation of this exact link wins (re-evaluate updates the row in place).
+        exporter.export_to_excel([{"opp": result, "msg": msg_dict}], config.OUTPUT_EXCEL_FILE,
+                                 replace_links=[url])
         print("✅ Done!")
     else:
         print(f"\n❌ AI Failed to evaluate. Reason: {error_msg}")

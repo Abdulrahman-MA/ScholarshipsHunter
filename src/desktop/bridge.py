@@ -5,16 +5,30 @@ Exceptions never reach the JS side. Only contract methods are public.
 """
 from __future__ import annotations
 
+import datetime as dt
 import functools
 import os
 import webbrowser
 from typing import Any
 from urllib.parse import urlparse
 
+from . import keys as keys_mod
 from . import runner, tracker
 
 IS_WIN = os.name == "nt"
 MASK = "·" * 4  # four middle dots, as in the contract
+
+
+def _key_pairs() -> list[tuple[str, str]]:
+    from src.core import config  # imported lazily; loads .env on first use
+
+    return ([("groq", k) for k in config.GROQ_API_KEYS]
+            + [("gemini", k) for k in config.GEMINI_API_KEYS])
+
+
+def _daily_view(sched: dict) -> dict:
+    return {"enabled": bool(sched.get("enabled")), "time": sched.get("time"),
+            "next_run": sched.get("next_run"), "scheduled": sched.get("task_name") is not None}
 
 
 def mask_key(key: Any) -> str:
@@ -73,12 +87,25 @@ class Api:
 
     @_safe
     def get_settings(self):
-        from src.core import config  # imported lazily; loads .env on first use
+        keys = [{"masked": mask_key(k), "provider": p} for p, k in _key_pairs()]
+        return {"keys": keys, "daily": _daily_view(runner.daily_schedule())}
 
-        keys = [{"masked": mask_key(k), "provider": "groq"} for k in config.GROQ_API_KEYS]
-        keys += [{"masked": mask_key(k), "provider": "gemini"} for k in config.GEMINI_API_KEYS]
-        sched = runner.daily_schedule()
-        return {"keys": keys, "daily": {"enabled": sched["enabled"], "time": sched["time"]}}
+    @_safe
+    def check_keys(self):
+        """Probe every configured key live; returns masked keys with a state each."""
+        pairs = _key_pairs()
+        states = keys_mod.check_all(pairs)
+        return {
+            "keys": [{"masked": mask_key(k), "provider": p, "state": s}
+                     for (p, k), s in zip(pairs, states)],
+            "checked_at": dt.datetime.now().strftime("%H:%M:%S"),
+        }
+
+    @_safe
+    def set_daily(self, enabled, time=None):
+        if not isinstance(enabled, bool):
+            raise ValueError("enabled must be true or false")
+        return {"ok": True, "daily": _daily_view(runner.set_daily(enabled, time))}
 
     @_safe
     def open_link(self, url):

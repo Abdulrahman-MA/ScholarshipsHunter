@@ -455,23 +455,65 @@
 
   /* ---------- settings ---------- */
 
+  function renderKeys(keys) {
+    $('keys-body').innerHTML = keys.length
+      ? keys.map(function (k) {
+          var cls = k.state ? stateClass(k.state) : 'dim';
+          return '<tr><td class="mono">' + dash(k.masked) + '</td><td>' + dash(k.provider) + '</td>' +
+            '<td class="state ' + cls + '">' + (k.state ? esc(k.state) : '—') + '</td></tr>';
+        }).join('')
+      : '<tr><td colspan="3" class="empty">No model keys found in .env.</td></tr>';
+    $('btn-check-keys').disabled = !keys.length;
+  }
+
+  function renderDaily(daily) {
+    daily = daily || {};
+    var sel = $('daily-state');
+    sel.options[0].textContent = daily.scheduled ? 'On' : 'On (creates the daily task)';
+    sel.value = daily.enabled ? 'on' : 'off';
+    if (daily.time) $('daily-time').value = daily.time;
+    $('daily-note').textContent = daily.scheduled
+      ? (daily.enabled ? 'Next run: ' + (daily.next_run || '—') : 'Scheduled task exists but is disabled.')
+      : 'No scheduled task yet. Choosing On and saving creates one for RunDaily.bat.';
+  }
+
   function loadSettings() {
     return call('get_settings').then(function (d) {
       if (!d) return;
-      var keys = Array.isArray(d.keys) ? d.keys : [];
-      $('keys-body').innerHTML = keys.length
-        ? keys.map(function (k) {
-            var cls = k.state ? stateClass(k.state) : 'dim';
-            return '<tr><td class="mono">' + dash(k.masked) + '</td><td>' + dash(k.provider) + '</td>' +
-              '<td class="state ' + cls + '">' + (k.state ? esc(k.state) : '—') + '</td></tr>';
-          }).join('')
-        : '<tr><td colspan="3" class="empty">No model keys found in .env.</td></tr>';
+      renderKeys(Array.isArray(d.keys) ? d.keys : []);
+      renderDaily(d.daily);
+    });
+  }
 
-      var daily = d.daily || {};
-      var sel = $('daily-state');
-      sel.options[0].textContent = 'On, every day at ' + (daily.time || '—');
-      sel.options[1].textContent = 'Off';
-      sel.selectedIndex = daily.enabled ? 0 : 1;
+  function checkKeys() {
+    var btn = $('btn-check-keys');
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
+    call('check_keys').then(function (d) {
+      btn.textContent = 'Check keys';
+      btn.disabled = false;
+      if (!d) return;
+      clearError('settings');
+      renderKeys(Array.isArray(d.keys) ? d.keys : []);
+      $('keys-checked').textContent = 'Checked at ' + (d.checked_at || '—');
+    });
+  }
+
+  function saveDaily() {
+    var btn = $('btn-daily-save');
+    var enabled = $('daily-state').value === 'on';
+    var time = $('daily-time').value;
+    if (enabled && !/^\d{2}:\d{2}$/.test(time)) {
+      showError('Pick a time for the daily sweep.');
+      return;
+    }
+    btn.disabled = true;
+    call('set_daily', enabled, time || null).then(function (d) {
+      btn.disabled = false;
+      if (!d) return;
+      clearError('settings');
+      renderDaily(d.daily);
+      loadOverview();
     });
   }
 
@@ -556,6 +598,8 @@
 
     // Settings
     $('btn-daily').addEventListener('click', function () { runTask('daily', {}, 'settings'); });
+    $('btn-check-keys').addEventListener('click', checkKeys);
+    $('btn-daily-save').addEventListener('click', saveDaily);
   }
 
   /* ---------- start ---------- */

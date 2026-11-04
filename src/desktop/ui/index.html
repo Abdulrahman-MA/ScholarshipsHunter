@@ -169,19 +169,26 @@
         <thead><tr><th>Key</th><th>Provider</th><th>State</th></tr></thead>
         <tbody id="keys-body"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody>
       </table>
+      <div class="filters">
+        <button class="btn line" id="btn-check-keys">Check keys</button>
+        <span class="empty" id="keys-checked">Not checked yet. Checking sends one list-models request per key.</span>
+      </div>
     </div>
     <div class="section">
       <h2>Daily sweep</h2>
       <div class="filters">
-        <select id="daily-state" disabled aria-label="Daily sweep"><option>On</option><option>Off</option></select>
+        <select id="daily-state" aria-label="Daily sweep"><option value="on">On</option><option value="off">Off</option></select>
+        <input id="daily-time" type="time" value="07:00" aria-label="Daily sweep time">
+        <button class="btn line" id="btn-daily-save">Save schedule</button>
         <button class="btn line" id="btn-daily">Run now</button>
       </div>
+      <p class="empty" id="daily-note"></p>
     </div>
   </div>
 </section>
 </main>
 
-<script src="mock.js"></script>
+<script src="http-bridge.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

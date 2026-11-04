@@ -50,3 +50,6 @@ data/*.log
 Thumbs.db
 .agent/
 .gemini/
+
+# Graphify cache (regenerable)
+graphify-out/cache/

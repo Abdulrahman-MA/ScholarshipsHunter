@@ -3,7 +3,13 @@ import os
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 
-def export_to_excel(opportunities, output_path):
+def export_to_excel(opportunities, output_path, replace_links=None):
+    """Append evaluated opportunities to the tracker.
+
+    replace_links: optional iterable of links whose existing rows are dropped
+    before merging, so a fresh evaluation replaces the stale one instead of
+    being discarded by the keep-first de-duplication below.
+    """
     if not opportunities:
         print("No opportunities to export.")
         return
@@ -87,6 +93,12 @@ def export_to_excel(opportunities, output_path):
     try:
         if os.path.exists(output_path):
             existing_df = pd.read_excel(output_path)
+            replace = {str(l).strip() for l in (replace_links or []) if str(l).strip()}
+            if replace and "Link" in existing_df.columns:
+                stale = existing_df["Link"].astype(str).str.strip().isin(replace)
+                if stale.any():
+                    print(f"Replacing {int(stale.sum())} existing row(s) with the new evaluation.")
+                existing_df = existing_df[~stale]
             combined_df = pd.concat([existing_df, df], ignore_index=True)
             # Drop duplicates based on Title and Link
             combined_df.drop_duplicates(subset=['Title', 'Link'], keep='first', inplace=True)
