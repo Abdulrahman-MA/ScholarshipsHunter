@@ -53,3 +53,4 @@ Thumbs.db
 
 # Graphify cache (regenerable)
 graphify-out/cache/
+data/desktop_state.json
